@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplier Quotation Follow-up: From Manual to Automated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: { colors: {
+    navy: '#1B3A5C', navyd: '#12293F', teal: '#0E9594', orange: '#F2803B',
+    paper: '#F5F7FA', line: '#DDE5EE'
+  }, fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+}
+</script>
+<style>
+  body{font-family:'Inter',system-ui,sans-serif}
+  .node{transition:transform .2s, box-shadow .2s}
+  .node:hover{transform:translateY(-3px); box-shadow:0 8px 24px rgba(27,58,92,.25)}
+  .node:hover .node-tip{opacity:1; pointer-events:auto}
+  .node-tip{opacity:0; pointer-events:none; transition:opacity .2s}
+  .bar{transition:width .8s cubic-bezier(.2,.7,.3,1)}
+  .hl{background:linear-gradient(transparent 55%, #FDE3C8 55%); padding:0 2px; font-weight:700}
+  .fade-up{opacity:0; transform:translateY(18px); transition:opacity .7s, transform .7s}
+  .fade-up.in{opacity:1; transform:none}
+  .tooltip{position:fixed; background:#12293F; color:#fff; font-size:12px; padding:6px 10px; border-radius:8px; pointer-events:none; opacity:0; transition:opacity .15s; z-index:50; white-space:nowrap}
+  table.trk tbody tr:hover{background:#EEF4FA}
+  .donut-seg{transition:opacity .2s; cursor:pointer}
+  .donut-seg:hover{opacity:.75}
+  .bar{animation:grow .5s ease}
+  @keyframes grow{from{width:0}}
+  .fx{box-shadow:0 1px 2px rgba(27,58,92,.06)}
+  .fx:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(27,58,92,.14)}
+  .fx{transition:all .18s ease}
+  #flow-after .fx,#flow-after2 .fx{min-width:74px;text-align:center}
+  .fx-arrow{color:#B8C6D8;font-weight:600}
+  ::selection{background:#0E9594; color:#fff}
+</style>
+</head>
+<body class="bg-paper text-slate-800">
+<div id="tip" class="tooltip"></div>
+
+<!-- ============ HERO ============ -->
+<header class="bg-navy text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 20% 30%, #fff 0 1.5px, transparent 2px),radial-gradient(circle at 70% 60%, #fff 0 1.5px, transparent 2px),radial-gradient(circle at 45% 85%, #fff 0 1.5px, transparent 2px);background-size:90px 90px,130px 130px,160px 160px"></div>
+  <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full" style="background:radial-gradient(circle,#0E9594aa,transparent 70%)"></div>
+  <div class="absolute -left-20 bottom-0 w-72 h-72 rounded-full" style="background:radial-gradient(circle,#F2803B66,transparent 70%)"></div>
+  <div class="max-w-6xl mx-auto px-6 py-16 relative">
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight max-w-3xl">Supplier Quotation Follow-up: From Manual to Automated with Power Automate</h1>
+    <p class="mt-4 text-lg text-slate-200">Strategic Procurement Process · Power Automate + Macros + BOTs + AI Agent</p>
+    <div class="mt-6 flex flex-wrap gap-2" id="chips">
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="pa">Power Automate</button>
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="outlook">Outlook Rules</button>
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="sp">SharePoint Tracker</button>
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="macro">VBA / Excel Macros</button>
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="bots">RPA Bots</button>
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="ia">AI Agent</button>
+      <button class="chip px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/20 hover:bg-white/25 hover:border-teal-300 transition cursor-pointer" data-modal="dash">Dashboard</button>
+      <span class="px-3 py-1.5 rounded-full text-[10px] text-slate-300 self-center">click each chip to see its function</span>
+    </div>
+    <div class="mt-8 inline-flex flex-col sm:flex-row items-stretch gap-0 rounded-2xl overflow-hidden border border-white/20">
+      <div class="px-5 py-4 bg-white/5">
+        <p class="text-xs uppercase tracking-widest text-slate-300">Before</p>
+        <p class="font-bold text-lg">100% manual</p>
+      </div>
+      <div class="px-5 py-4 bg-teal flex items-center justify-center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="px-5 py-4 bg-white/10">
+        <p class="text-xs uppercase tracking-widest text-teal-300">After</p>
+        <p class="font-bold text-lg">End-to-end automated</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6">
+
+<!-- ============ B) TRANSFORMACIÓN ============ -->
+<section class="py-16 fade-up">
+  <h2 class="text-2xl font-extrabold text-navy">1 · Process Transformation</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-6">Operational comparison: from manual buyer management to bot-driven automation.</p>
+  <div class="overflow-x-auto rounded-2xl shadow-sm border border-line bg-white">
+    <table class="w-full text-sm min-w-[720px]">
+      <thead>
+        <tr class="bg-navy text-white text-left">
+          <th class="px-5 py-3 font-semibold w-40">Dimension</th>
+          <th class="px-5 py-3 font-semibold bg-[#7a2c2c]/40">Before (Manual)</th>
+          <th class="px-5 py-3 font-semibold bg-teal/30">After (Automated)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-antes" class="divide-y divide-line"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ C) FLUJO POWER AUTOMATE ============ -->
+<section class="py-16 fade-up">
+  <h2 class="text-2xl font-extrabold text-navy">2 · Power Automate Flows: before vs after</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-6">On the left, the process as it was executed manually. On the right, the same process covered by the 9 flows created in Power Automate (all Automated).</p>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- ANTES -->
+    <div class="bg-white rounded-2xl border border-line shadow-sm overflow-hidden">
+      <div class="px-5 py-3 text-white font-bold text-sm flex items-center gap-2" style="background:linear-gradient(90deg,#8a3030,#7a2c2c)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        BEFORE · 100% manual process (0 flows)
+      </div>
+      <div class="p-5">
+        <div class="flex flex-col items-stretch gap-0" id="flow-before">
+          <button class="fx text-left flex items-center gap-3 p-3 rounded-xl border border-red-200 bg-red-50 hover:border-[#7a2c2c] hover:shadow transition cursor-pointer" data-t="Send quotations manually" data-d="The buyer writes and sends each email supplier by supplier, with generic templates and multiple PRs mixed in a single email. No standardized subject line."><span class="w-7 h-7 rounded-full bg-[#7a2c2c] text-white font-bold text-xs flex items-center justify-center shrink-0">1</span><span class="text-sm font-semibold text-navy">Send quotations manually</span></button>
+          <div class="flex justify-center py-1"><svg width="12" height="16" viewBox="0 0 12 16"><path d="M6 0v11M2 8l4 5 4-5" fill="none" stroke="#B8C6D8" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <button class="fx text-left flex items-center gap-3 p-3 rounded-xl border border-red-200 bg-red-50 hover:border-[#7a2c2c] hover:shadow transition cursor-pointer" data-t="Check the inbox manually" data-d="Search for responses one by one in the Outlook inbox, open each attachment and figure out which PR it belongs to."><span class="w-7 h-7 rounded-full bg-[#7a2c2c] text-white font-bold text-xs flex items-center justify-center shrink-0">2</span><span class="text-sm font-semibold text-navy">Check the inbox manually</span></button>
+          <div class="flex justify-center py-1"><svg width="12" height="16" viewBox="0 0 12 16"><path d="M6 0v11M2 8l4 5 4-5" fill="none" stroke="#B8C6D8" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <button class="fx text-left flex items-center gap-3 p-3 rounded-xl border border-red-200 bg-red-50 hover:border-[#7a2c2c] hover:shadow transition cursor-pointer" data-t="Download and attach manually" data-d="Save each quotation and link it in the tracker; risk of lost or duplicated documents."><span class="w-7 h-7 rounded-full bg-[#7a2c2c] text-white font-bold text-xs flex items-center justify-center shrink-0">3</span><span class="text-sm font-semibold text-navy">Download and attach manually</span></button>
+          <div class="flex justify-center py-1"><svg width="12" height="16" viewBox="0 0 12 16"><path d="M6 0v11M2 8l4 5 4-5" fill="none" stroke="#B8C6D8" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <button class="fx text-left flex items-center gap-3 p-3 rounded-xl border border-red-200 bg-red-50 hover:border-[#7a2c2c] hover:shadow transition cursor-pointer" data-t="Follow-ups based on the buyer’s memory" data-d="No automatic reminders: follow-ups depend on each buyer remembering to do them. No SLA."><span class="w-7 h-7 rounded-full bg-[#7a2c2c] text-white font-bold text-xs flex items-center justify-center shrink-0">4</span><span class="text-sm font-semibold text-navy">Follow-ups based on the buyer’s memory</span></button>
+          <div class="flex justify-center py-1"><svg width="12" height="16" viewBox="0 0 12 16"><path d="M6 0v11M2 8l4 5 4-5" fill="none" stroke="#B8C6D8" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <button class="fx text-left flex items-center gap-3 p-3 rounded-xl border border-red-200 bg-red-50 hover:border-[#7a2c2c] hover:shadow transition cursor-pointer" data-t="Saturated folders" data-d="Attachments pile up with no cleanup; unanswered PRs go unseen and there is no traceability."><span class="w-7 h-7 rounded-full bg-[#7a2c2c] text-white font-bold text-xs flex items-center justify-center shrink-0">5</span><span class="text-sm font-semibold text-navy">Saturated folders · Lost PRs</span></button>
+        </div>
+        <p class="text-xs text-[#7a2c2c] font-semibold bg-red-50 border border-red-200 rounded p-2 mt-4">⚠️ No SLA, no traceability, no standardization — everything depended on the person. Click each step for details.</p>
+      </div>
+    </div>
+
+    <!-- DESPUÉS -->
+    <div class="bg-white rounded-2xl border-2 border-teal shadow-md overflow-hidden">
+      <div class="px-5 py-3 text-white font-bold text-sm flex items-center gap-2" style="background:linear-gradient(90deg,#0E9594,#0B7E7C)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l-1 8z"/></svg>
+        AFTER · Automated flow (9 BOTs · all Automated)
+      </div>
+      <div class="p-5 space-y-4">
+        <!-- FASE 1 -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-[#2E9E5B] text-white text-[10px] flex items-center justify-center">1</span> Quotation</p>
+          <div class="flex items-center flex-wrap gap-y-2">
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#2E9E5B] bg-green-50 cursor-pointer" data-t="Custom Macro (trigger)" data-d="Consolidates the request by PR number, subject = Solicitação de orçamento + PR number, language by country and standardized signature."><b class="text-xs text-[#2E9E5B]">Macro PR</b><p class="text-[10px] text-slate-500 leading-tight">Request by PR number</p></button>
+            <span class="fx-arrow px-1"><svg width="22" height="12" viewBox="0 0 22 12"><path d="M0 6h15M15 2l6 4-6 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#2B6CB0] bg-blue-50 cursor-pointer" data-t="BOT_QR" data-d="Reads the supplier response, takes the attachment, renames it with the PR number and updates the tracker with status QR_BOT."><b class="text-xs text-[#2B6CB0]">BOT_QR</b><p class="text-[10px] text-slate-500 leading-tight">Attachment → tracker</p></button>
+            <span class="fx-arrow px-1"><svg width="22" height="12" viewBox="0 0 22 12"><path d="M0 6h15M15 2l6 4-6 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <div class="fx flex items-center justify-center" style="width:86px;height:56px;background:linear-gradient(135deg,#FDF6E3,#FAEDCB);border:2px solid #E0A526;border-radius:14px;clip-path:polygon(14% 0,100% 0,86% 100%,0 100%);cursor:pointer" data-t="Any response?" data-d="Decision: if the supplier responded with a valid attachment, BOT_QR closes the PR as QR_BOT. If not, the flow moves on to the follow-ups."><b class="text-[10px] text-[#B8860B] text-center leading-tight px-2">Any<br>response?</b></div>
+          </div>
+        </div>
+        <!-- FASE 2 -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-[#2B6CB0] text-white text-[10px] flex items-center justify-center">2</span> Follow-up (if no response)</p>
+          <div class="flex items-center flex-wrap gap-y-2">
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#2B6CB0] bg-blue-50 cursor-pointer" data-t="2 Follow_Email" data-d="1st reminder to the supplier: analyzes aging ≥ 2 days, checks the E-mail Supplier column and GEP Action = Pending with Supplier."><b class="text-xs text-[#2B6CB0]">2 Follow_Email</b><p class="text-[10px] text-slate-500 leading-tight">1st reminder</p></button>
+            <span class="fx-arrow px-1"><svg width="22" height="12" viewBox="0 0 22 12"><path d="M0 6h15M15 2l6 4-6 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#2B6CB0] bg-blue-50 cursor-pointer" data-t="3 Follow_Email" data-d="2nd reminder to the supplier; it also emails the buyer informing that there is no response."><b class="text-xs text-[#2B6CB0]">3 Follow_Email</b><p class="text-[10px] text-slate-500 leading-tight">2nd reminder</p></button>
+          </div>
+        </div>
+        <!-- FASE 3 -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-[#7C4DBE] text-white text-[10px] flex items-center justify-center">3</span> AI escalation (no response after 3 follow-ups)</p>
+          <div class="flex items-center flex-wrap gap-y-2">
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#7C4DBE] bg-purple-50 cursor-pointer" data-t="AI Agent · Suppliers Category card" data-d="Reviews previous purchases and historical data by category and suggests the next best supplier."><b class="text-xs text-[#7C4DBE]">AI Agent</b><p class="text-[10px] text-slate-500 leading-tight">Suggests supplier</p></button>
+            <span class="fx-arrow px-1"><svg width="22" height="12" viewBox="0 0 22 12"><path d="M0 6h15M15 2l6 4-6 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#2B6CB0] bg-blue-50 cursor-pointer" data-t="Waiting_for another supplier + Second Round" data-d="Assigns the suggested new vendor and triggers 2 Follow_Second Round and 3 Follow_Second Round with the new supplier."><b class="text-xs text-[#2B6CB0]">2nd round</b><p class="text-[10px] text-slate-500 leading-tight">Follow-up new supplier</p></button>
+            <span class="fx-arrow px-1"><svg width="22" height="12" viewBox="0 0 22 12"><path d="M0 6h15M15 2l6 4-6 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#C0392B] bg-red-50 cursor-pointer" data-t="Reject_Bot" data-d="If there is definitely no response from the new supplier, it marks the PR with status To be rejected."><b class="text-xs text-[#C0392B]">Reject_Bot</b><p class="text-[10px] text-slate-500 leading-tight">To be rejected closure</p></button>
+          </div>
+        </div>
+        <!-- FASE 4 -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-[#0E9594] text-white text-[10px] flex items-center justify-center">4</span> Support & control</p>
+          <div class="flex items-center flex-wrap gap-y-2">
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#2B6CB0] bg-blue-50 cursor-pointer" data-t="Requester" data-d="Manages pending items with the requester when the PR is Pending with Requester."><b class="text-xs text-[#2B6CB0]">Requester</b></button>
+            <span class="text-slate-300 px-1">·</span>
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-[#0E9594] bg-teal-50 cursor-pointer" data-t="Clean_File" data-d="Cleans the BOT folder every 2 weeks so it does not fill up with attachments."><b class="text-xs text-[#0E9594]">Clean_File</b></button>
+
+            <span class="text-slate-300 px-1">·</span>
+            <button class="fx px-3 py-2.5 rounded-xl border-2 border-navy bg-slate-50 cursor-pointer" data-t="Follow up Dashboard" data-d="KPIs: Total Records, Average of Aging and Priority Follow Up. Buyers detect the PRs with the most days open and work by priority."><b class="text-xs text-navy">Dashboard</b></button>
+          </div>
+        </div>
+        <p class="text-xs text-teal font-semibold bg-teal/5 border border-teal/30 rounded p-2 mt-2">✅ End-to-end coverage: quotation → response → follow-ups → new supplier → closure. The buyer only manages by exception. Click each node to see its function.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ D) PLANTILLA CORREO ============ -->
+<section class="py-16 fade-up">
+  <h2 class="text-2xl font-extrabold text-navy">3 · Email template: before vs after</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-6">The macro customizes the subject line with the PR number (key for the bots to read the response), uses a single language per country and a standardized signature.</p>
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- ANTES -->
+    <div class="bg-white rounded-2xl border border-line shadow-sm overflow-hidden">
+      <div class="px-5 py-3 text-white font-bold text-sm flex items-center gap-2" style="background:linear-gradient(90deg,#8a3030,#7a2c2c)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        BEFORE · Generic email
+      </div>
+      <div class="p-5 text-sm">
+        <p class="text-xs text-slate-400">Subject:</p>
+        <p class="font-mono text-xs bg-red-50 border border-red-200 rounded p-2 text-[#7a2c2c] break-words">SOLICITACIÓN DE COTIZACIÓN // SOLICITAÇÃO DE COTAÇÃO</p>
+        <p class="mt-3 text-xs text-slate-500">❌ No PR number · 2 mixed languages · several PRs together · no signature</p>
+        <table class="mt-4 w-full text-[11px] border border-line">
+          <thead><tr class="bg-slate-100 text-slate-500"><th class="p-1.5 text-left">PR</th><th class="p-1.5 text-left">Material</th><th class="p-1.5 text-left">Qty</th></tr></thead>
+          <tbody class="font-mono">
+            <tr><td class="p-1.5">PR-7204102 / PR-7204103 / PR-7204104</td><td class="p-1.5">varios</td><td class="p-1.5">varias</td></tr>
+            <tr><td class="p-1.5">PR-7204100 / PR-7204101 ...</td><td class="p-1.5">mixto MX + BR</td><td class="p-1.5">mixto</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- DESPUÉS -->
+    <div class="bg-white rounded-2xl border-2 border-teal shadow-md overflow-hidden">
+      <div class="px-5 py-3 text-white font-bold text-sm flex items-center gap-2" style="background:linear-gradient(90deg,#0E9594,#0B7E7C)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        AFTER · Macro customized by PR
+      </div>
+      <div class="p-5 text-sm">
+        <p class="text-xs text-slate-400">Subject:</p>
+        <p class="font-mono text-xs bg-green-50 border border-green-300 rounded p-2 text-teal font-bold"><span class="hl">Solicitação de orçamento</span> <span class="hl">PR-7204105</span></p>
+        <p class="mt-3 text-xs text-slate-500">✓ Single language (pt-BR for Brazil / es-MX for Mexico) · one PR per email · standardized signature</p>
+        <table class="mt-4 w-full text-[11px] border border-line">
+          <thead><tr class="bg-teal/10 text-navy"><th class="p-1.5 text-left">PR</th><th class="p-1.5 text-left">Line</th><th class="p-1.5 text-left">Qty</th><th class="p-1.5 text-left">Material</th><th class="p-1.5 text-left">Description</th><th class="p-1.5 text-left">Delivery Address</th><th class="p-1.5 text-left">UoM</th><th class="p-1.5 text-left">Currency</th></tr></thead>
+          <tbody class="font-mono">
+            <tr class="border-t border-line"><td class="p-1.5">PR-7204105</td><td class="p-1.5">10</td><td class="p-1.5">40</td><td class="p-1.5">MAT-88421</td><td class="p-1.5">Industrial hydraulic filter</td><td class="p-1.5">CD Querétaro, MX</td><td class="p-1.5">EA</td><td class="p-1.5">EUR</td></tr>
+            <tr class="border-t border-line"><td class="p-1.5">PR-7204105</td><td class="p-1.5">20</td><td class="p-1.5">120</td><td class="p-1.5">MAT-91002</td><td class="p-1.5">Mechanical seal 40 mm</td><td class="p-1.5">CD Querétaro, MX</td><td class="p-1.5">EA</td><td class="p-1.5">EUR</td></tr>
+          </tbody>
+        </table>
+        <p class="mt-4 text-xs text-slate-600 italic border-t border-line pt-3"><span class="hl">Atenciosamente,<br>Equipo Fulfillment</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ E) TRACKER ============ -->
+<section class="py-10 fade-up">
+  <h2 class="text-2xl font-extrabold text-navy">4 · Quotation tracker (SharePoint · simulated)</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-4">Filter by status or search by PR, buyer, supplier or country.</p>
+  <div class="bg-white rounded-2xl border border-line shadow-sm p-5">
+    <div class="flex flex-wrap gap-3 items-center mb-4">
+      <input id="q" oninput="renderTracker()" placeholder="Search PR, buyer, supplier..." class="px-3 py-2 text-sm border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-teal w-64">
+      <div id="statusChips" class="flex flex-wrap gap-2"></div>
+      <span class="ml-auto text-xs text-slate-500" id="trkCount"></span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="trk w-full text-xs min-w-[1200px]">
+        <thead><tr class="text-left text-slate-500 border-b-2 border-line uppercase tracking-wide text-[10px]">
+          <th class="p-2.5">PR</th><th class="p-2.5">Request Status</th><th class="p-2.5">Buyer</th><th class="p-2.5">CC</th><th class="p-2.5">Purchase Summary</th><th class="p-2.5 text-right">Total EUR</th><th class="p-2.5">Supplier</th><th class="p-2.5">Country</th><th class="p-2.5">Requester</th><th class="p-2.5">Suppl. Type</th><th class="p-2.5">Attachment</th><th class="p-2.5">GEP Action</th><th class="p-2.5">1st F/U</th><th class="p-2.5 text-right">Aging</th><th class="p-2.5">F/U Status</th>
+        </tr></thead>
+        <tbody id="trkBody" class="divide-y divide-line font-mono"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ F) DASHBOARD ============ -->
+<section class="py-10 fade-up">
+  <h2 class="text-2xl font-extrabold text-navy">5 · Follow up Dashboard</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-6">Aging, SLA and priorities in real time. Hover over the bars. Click any bar or segment to filter.</p>
+  <div class="grid lg:grid-cols-3 gap-5">
+    <!-- KPIs + filtros -->
+    <div class="space-y-5">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-xl border border-line shadow-sm p-4 text-center"><p id="kpiTotal" class="text-3xl font-black text-navy">230</p><p class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Total Records</p></div>
+        <div class="bg-white rounded-xl border border-line shadow-sm p-4 text-center"><p id="kpiAging" class="text-3xl font-black text-teal">3.96</p><p class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Avg Aging</p></div>
+        <div class="bg-white rounded-xl border border-line shadow-sm p-4 text-center"><p id="kpiPriority" class="text-3xl font-black text-orange">42</p><p class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Priority F/U</p></div>
+      </div>
+      <div class="bg-white rounded-xl border border-line shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3"><p class="text-xs font-bold text-navy uppercase tracking-wider">Active filters</p><button id="dashClear" class="text-[11px] text-teal font-semibold hover:underline hidden">✕ clear</button></div>
+        <div id="dashFilterInfo" class="text-xs text-slate-600 min-h-[18px]">Click any bar or segment to filter.</div>
+      </div>
+      <div class="bg-white rounded-xl border border-line shadow-sm p-4">
+        <p class="text-xs font-bold text-navy uppercase tracking-wider mb-3">Aging by PR (desc)</p>
+        <table class="w-full text-xs font-mono"><tbody id="agingBody" class="divide-y divide-line"></tbody></table>
+      </div>
+    </div>
+    <!-- Charts -->
+    <div class="lg:col-span-2 space-y-5">
+      <div class="bg-white rounded-xl border border-line shadow-sm p-5">
+        <p class="text-sm font-bold text-navy mb-4">Pending with supplier · QR — by buyer</p>
+        <div class="flex flex-col md:flex-row gap-5">
+          <div class="md:w-52 shrink-0">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Buyers · click to filter</p>
+            <div id="buyerList" class="space-y-1"></div>
+          </div>
+          <div id="chartBuyers" class="space-y-3 flex-1"></div>
+        </div>
+        <div class="flex gap-4 text-[11px] text-slate-500 mt-3">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-navy"></span>Legacy pending supplier</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-orange"></span>Null / legacy supplier</span>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-xl border border-line shadow-sm p-5">
+          <p class="text-sm font-bold text-navy mb-4">QR BOT — by supplier</p>
+          <div id="chartQR" class="space-y-3"></div>
+        </div>
+        <div class="bg-white rounded-xl border border-line shadow-sm p-5 flex flex-col items-center">
+          <p class="text-sm font-bold text-navy mb-2 self-start">Total PRs by Agent</p>
+          <svg id="donut" viewBox="0 0 220 220" class="w-52 h-52"></svg>
+          <div id="donutLegend" class="text-[11px] grid grid-cols-2 gap-x-4 gap-y-1 mt-2 w-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ G) IMPACTO ============ -->
+<section class="py-16 fade-up">
+  <h2 class="text-2xl font-extrabold text-navy">6 · Impact KPIs</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-6">Results after implementation (fictional data from the anonymized case).</p>
+  <div class="bg-white rounded-2xl border-t-4 border-teal shadow-sm p-5 mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+      <p class="text-5xl font-black text-teal shrink-0">90%</p>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-navy">Process improvement after implementation</p>
+        <p class="text-xs text-slate-600 mt-1">El <b>90%</b>  of PRs are now closed automatically by the BOTs; only <b>10%</b> of exceptions with suppliers remain, because they need more information about the requested material(s) or services and require manual buyer management.</p>
+        <div class="mt-3 h-4 rounded-full bg-slate-100 overflow-hidden flex">
+          <div class="bar h-full bg-teal" style="width:90%"></div><div class="bar h-full bg-orange" style="width:10%"></div>
+        </div>
+        <div class="flex justify-between text-[10px] font-semibold mt-1"><span class="text-teal">90% automated</span><span class="text-orange">10% exceptions</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="bg-white rounded-2xl border-t-4 border-teal shadow-sm p-5"><p class="text-4xl font-black text-teal">-80%</p><p class="text-xs text-slate-600 mt-2 font-medium">Manual follow-up time</p></div>
+    <div class="bg-white rounded-2xl border-t-4 border-navy shadow-sm p-5"><p class="text-4xl font-black text-navy">100%</p><p class="text-xs text-slate-600 mt-2 font-medium">Traceability in SharePoint</p></div>
+    <div class="bg-white rounded-2xl border-t-4 border-teal shadow-sm p-5"><p class="text-4xl font-black text-teal">3.9<span class="text-lg"> days</span></p><p class="text-xs text-slate-600 mt-2 font-medium">Average supplier response</p></div>
+    <div class="bg-white rounded-2xl border-t-4 border-orange shadow-sm p-5"><p class="text-4xl font-black text-orange">~42</p><p class="text-xs text-slate-600 mt-2 font-medium">PRs prioritized automatically</p></div>
+    <div class="bg-white rounded-2xl border-t-4 border-navy shadow-sm p-5"><p class="text-4xl font-black text-navy">14<span class="text-lg"> days</span></p><p class="text-xs text-slate-600 mt-2 font-medium">Automatic BOT folder cleanup</p></div>
+  </div>
+</section>
+</main>
+
+<footer class="bg-navyd text-slate-300 py-8 text-center text-xs">
+  <p>Portfolio project · RPA in Strategic Procurement Process · Fictional data</p>
+  <p class="mt-1 text-slate-500">All data, PRs, suppliers and people are fictional. Power Automate, Outlook, SharePoint and Excel are Microsoft trademarks.</p>
+</footer>
+
+<script>
+/* ---------- util tooltip ---------- */
+const tip=document.getElementById('tip');
+function showTip(e,text){tip.textContent=text;tip.style.opacity=1;tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px'}
+function hideTip(){tip.style.opacity=0}
+document.addEventListener('mousemove',e=>{if(tip.style.opacity==1){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px'}});
+
+/* ---------- B: comparativa ---------- */
+const comp=[
+["Execution","Manual follow-ups to the supplier, one by one.","Bots run automatic follow-ups every 48 h per PR."],
+["Communication","Generic templates with no standardization.","Macros customized by PR + language; standardized subject line for the BOTs to read."],
+["Traceability","Limited visibility scattered across emails.","Full traceability in SharePoint; centralized statuses updated by the bots."],
+["Outlook","Manual inbox of emails and attachments.","Rules + folders that extract and centralize responses automatically."],
+["Quotations","Manual download and management of attachments.","Bot downloads the attachment, renames it by PR number, links it in the tracker line and changes the status (QR_BOT)."],
+["Rejections","Open cases with no structured control.","Automated closure (Reject_BOT on inactivity)."],
+["Re-sourcing","No control: manual search for alternatives.","AI agent recommends a new supplier based on purchase history."],
+["Visibility","Fragmented, non-centralized information.","Centralized dashboard with aging, SLA, follow-ups, statuses and priorities in real time."],
+["Documents","Clutter in folders and emails.","Automated cleanup and organization agent."],
+["Buyer focus","Manual follow-up and operational tasks.","PR processing and management by exception."]];
+document.getElementById('tbody-antes').innerHTML=comp.map(r=>`<tr class="align-top">
+ <td class="px-5 py-3 font-semibold text-navy">${r[0]}</td>
+ <td class="px-5 py-3 text-slate-500 bg-red-50/40">${r[1]}</td>
+ <td class="px-5 py-3 text-slate-700 bg-teal/5">${r[2]}</td></tr>`).join('');
+
+/* ---------- E: tracker ---------- */
+const S={ps:'Pending with Supplier',qr:'QR_BOT',pr:'Pending with Requester',sv:'Savings process',rj:'To be rejected'};
+const rows=[
+["PR-7204106",S.ps,"Buyer A","1020","Packaging line spare parts MX",8340.00,"Pneumatics Supplier MX-001","Mexico","Requester R1","Distributor","Pending","Pending with Supplier","Yes",6,"2_Follow up"],
+["PR-7204107",S.ps,"Buyer B","1010","Centrifugal pumps BR",4120.50,"Hydraulics Supplier BR-004","Brazil","Requester R2","Manufacturer","Pending","Pending with Supplier","Yes",4,"2_Follow up"],
+["PR-7204109",S.qr,"Buyer A","1020","Mechanical seals 40 mm",980.00,"Pneumatics Supplier MX-001","Mexico","Requester R3","Manufacturer","Received","Pending with Supplier","Yes",3,""],
+["PR-7204111",S.qr,"Buyer C","1030","Hydraulic filters",275.90,"Hardware Supplier MX-002","Mexico","Requester R1","Distributor","Received","Pending with Supplier","Yes",2,""],
+["PR-7204108",S.ps,"Buyer B","1010","Bearings series 6205",640.25,"Bearings Supplier BR-007","Brazil","Requester R4","Distributor","Pending","Pending with Supplier","Yes",5,"3_Follow up"],
+["PR-7204110",S.ps,"Buyer D","1020","Electric motor 5 HP",7210.00,"Electrical Supplier BR-001","Brazil","Requester R2","Manufacturer","Pending","Pending with Supplier","Yes",7,"3_Follow up"],
+["PR-7204112",S.pr,"Buyer C","1030","Pneumatic valves",1450.00,"Pneumatics Supplier MX-001","Mexico","Requester R5","Manufacturer","Pending","Pending with Requester","No",1,""],
+["PR-7204113",S.sv,"Buyer E","1010","Conveyor belts",3210.75,"Transport Supplier BR-002","Brazil","Requester R1","Distributor","Received","Savings process","Yes",4,""],
+["PR-7204114",S.ps,"Buyer F","1030","Inductive sensors",860.10,"Electrical Supplier MX-003","Mexico","Requester R3","Manufacturer","Pending","Pending with Supplier","Yes",8,"3_Follow up"],
+["PR-7204115",S.qr,"Buyer D","1010","Air compressor",5890.00,"Hardware Supplier MX-002","Mexico","Requester R4","Distributor","Received","Pending with Supplier","Yes",2,""],
+["PR-7204116",S.rj,"Buyer A","1030","Manual packer (re-sourcing)",0.01,"Industrial Supplier MX-009","Mexico","Requester R5","Distributor","Pending","To be rejected","No",12,"3_Follow up"],
+["PR-7204117",S.ps,"Buyer E","1020","Stainless steel fasteners",120.00,"Hardware Supplier MX-002","Mexico","Requester R2","Distributor","Pending","Pending with Supplier","Yes",5,"2_Follow up"],
+["PR-7204118",S.qr,"Buyer B","1010","Hydraulic oil 200 L",940.00,"Hydraulics Supplier BR-004","Brazil","Requester R1","Manufacturer","Received","Pending with Supplier","Yes",3,""],
+["PR-7204119",S.rj,"Buyer F","1020","Maintenance kit (re-sourcing)",15.50,"Industrial Supplier MX-009","Mexico","Requester R3","Manufacturer","Pending","To be rejected","No",14,"3_Follow up"]];
+const badge=(s)=>{const m={[S.ps]:'bg-amber-100 text-amber-800',[S.qr]:'bg-teal/15 text-teal font-bold',[S.pr]:'bg-blue-100 text-blue-800',[S.sv]:'bg-emerald-100 text-emerald-800',[S.rj]:'bg-red-100 text-red-700 font-semibold'};return `<span class="px-2 py-0.5 rounded-full ${m[s]||'bg-slate-100 text-slate-600'} whitespace-nowrap">${s}</span>`};
+const fu=(s)=>s==='2_Follow up'?'<span class="text-amber-700 font-bold">'+s+'</span>':s==='3_Follow up'?'<span class="text-red-600 font-bold">'+s+'</span>':'';
+let curFilter='Todos';
+const statuses=['Todos',S.ps,S.qr,S.pr,S.sv,S.rj];
+function renderChips(){document.getElementById('statusChips').innerHTML=statuses.map(s=>`<button onclick="curFilter='${s}';renderChips();renderTracker()" class="px-3 py-1.5 rounded-full text-xs font-semibold border transition ${curFilter===s?'bg-navy text-white border-navy':'bg-white text-slate-600 border-line hover:border-navy'}">${s}</button>`).join('')}
+function renderTracker(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const f=rows.filter(r=>(curFilter==='Todos'||r[1]===curFilter)&&r.join(' ').toLowerCase().includes(q));
+  document.getElementById('trkBody').innerHTML=f.map(r=>`<tr>
+   <td class="p-2.5 font-bold text-navy">${r[0]}</td><td class="p-2.5">${badge(r[1])}</td><td class="p-2.5">${r[2]}</td>
+   <td class="p-2.5">${r[3]}</td><td class="p-2.5 font-sans">${r[4]}</td>
+   <td class="p-2.5 text-right font-semibold">€${r[5].toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+   <td class="p-2.5">${r[6]}</td><td class="p-2.5">${r[7]}</td><td class="p-2.5">${r[8]}</td><td class="p-2.5">${r[9]}</td>
+   <td class="p-2.5">${r[10]==='Received'?'<span class="text-teal font-bold">Received</span>':r[10]}</td>
+   <td class="p-2.5 font-sans">${r[11]}</td><td class="p-2.5">${r[12]}</td>
+   <td class="p-2.5 text-right ${r[13]>=10?'text-red-600 font-black':r[13]>=5?'text-amber-600 font-bold':''}">${r[13]}</td>
+   <td class="p-2.5">${fu(r[14])}</td></tr>`).join('');
+  document.getElementById('trkCount').textContent=f.length+' de '+rows.length+' registros (simulado: 230 reales)';
+}
+renderChips();renderTracker();
+
+/* ---------- F: dashboard (interactivo) ---------- */
+const buyers=[['Buyer A',18,6],['Buyer B',14,4],['Buyer C',11,5],['Buyer D',9,3],['Buyer E',7,2],['Buyer F',5,1]];
+const qrData=[['HW Supplier MX-002',31],['Pneumatics Supplier MX-001',8],['Electrical Supplier BR-001',7]];
+const agents=[['Buyer B. Ramirez',52,'#1B3A5C'],['Buyer M. Alvarez',44,'#0E9594'],['Buyer S. Duarte',38,'#F2803B'],['Buyer C. Herrera',30,'#7C4DBE'],['Buyer J. Fuentes',24,'#E0A526'],['Buyer A. Cordero',22,'#2B6CB0'],['Buyer K. Mora',20,'#9DB2C6']];
+const dash={buyer:null,supplier:null,agent:null};
+function dashActive(){return dash.buyer||dash.supplier||dash.agent;}
+function dashFiltered(){
+  return rows.filter(r=>
+    (!dash.buyer||r[2]===dash.buyer)&&
+    (!dash.supplier||r[6]===dash.supplier)&&
+    (!dash.agent||r[2]===dash.agent));
+}
+function renderDash(){
+  const f=dashFiltered();
+  const total=f.length||0;
+  const avg=total?(f.reduce((a,r)=>a+r[13],0)/total):0;
+  const prio=f.filter(r=>r[13]>=5||r[14]).length;
+  document.getElementById('kpiTotal').textContent=total;
+  document.getElementById('kpiAging').textContent=total?(avg).toFixed(2):'0';
+  document.getElementById('kpiPriority').textContent=prio;
+  const chips=[];
+  if(dash.buyer)chips.push(`Buyer: <b>${dash.buyer}</b>`);
+  if(dash.supplier)chips.push(`Proveedor: <b>${dash.supplier}</b>`);
+  if(dash.agent)chips.push(`Agente: <b>${dash.agent}</b>`);
+  const info=document.getElementById('dashFilterInfo');
+  info.innerHTML=dashActive()?(chips.join(' · ')+` — ${total} PR(s)`):'Click any bar or segment to filter.';
+  document.getElementById('dashClear').classList.toggle('hidden',!dashActive());
+  // aging table
+  const ag=f.map(r=>[r[0],r[13]]).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('agingBody').innerHTML=ag.length?ag.map(([pr,d])=>`<tr class="${d>=10?'bg-red-50':d>=5?'bg-amber-50':''}">
+ <td class="p-2 font-bold text-navy">${pr}</td><td class="p-2 text-right font-semibold ${d>=10?'text-red-600':d>=5?'text-amber-600':''}">${d} d</td></tr>`).join(''):'<tr><td class="p-3 text-slate-400">No records with this filter.</td></tr>';
+  renderBars();renderDonut();renderBuyerList();
+}
+function renderBars(){
+  document.getElementById('chartBuyers').innerHTML=buyers.map(([n,v1,v2])=>{
+    const sel=dash.buyer===n;
+    const w1=(v1/24*100).toFixed(1),w2=(v2/24*100).toFixed(1);
+    return `<div class="cursor-pointer group flex items-center gap-3" onclick="setDash('buyer','${n}')" title="Filter by ${n}">
+     <span class="w-16 text-xs ${sel?'text-teal font-bold':'text-slate-600'} shrink-0">${sel?'● ':''}${n}</span>
+     <div class="flex-1 h-5 bg-slate-100 rounded overflow-hidden flex group-hover:opacity-80 transition">
+       <div class="bar h-full bg-navy" style="width:${w1}%"></div><div class="bar h-full bg-orange" style="width:${w2}%"></div>
+     </div>
+     <span class="w-8 text-xs font-bold text-navy text-right">${v1+v2}</span></div>`}).join('');
+  document.getElementById('chartQR').innerHTML=qrData.map(([n,v])=>{
+    const sel=dash.supplier===n;
+    const w=(v/31*100).toFixed(1);
+    return `<div class="cursor-pointer flex items-center gap-3 ${sel?'font-bold':''}" onclick="setDash('supplier','${n}')" title="Filter by ${n}">
+     <span class="w-24 text-[11px] ${sel?'text-teal':'text-slate-600'} shrink-0 leading-tight">${sel?'● ':''}${n}</span>
+     <div class="flex-1 h-5 bg-slate-100 rounded overflow-hidden"><div class="bar h-full ${sel?'bg-teal':'bg-navy'} group-hover:opacity-80" style="width:${w}%"></div></div>
+     <span class="w-6 text-xs font-bold text-navy text-right">${v}</span></div>`}).join('');
+}
+function renderDonut(){
+  const total=agents.reduce((a,b)=>a+b[1],0);let acc=-90,svg='';
+  agents.forEach(a=>{const ang=a[1]/total*360;
+    const large=ang>180?1:0, r1=90,r2=55;
+    const p=(r,A)=>[110+r*Math.cos(A*Math.PI/180),110+r*Math.sin(A*Math.PI/180)];
+    const [x1,y1]=p(r1,acc),[x2,y2]=p(r1,acc+ang),[x3,y3]=p(r2,acc+ang),[x4,y4]=p(r2,acc);
+    const sel=dash.agent===a[0];
+    svg+=`<path class="donut-seg" d="M${x1} ${y1} A${r1} ${r1} 0 ${large} 1 ${x2} ${y2} L${x3} ${y3} A${r2} ${r2} 0 ${large} 0 ${x4} ${y4} Z" fill="${a[2]}" ${sel?'stroke="#0E9594" stroke-width="4"':''} onclick="setDash('agent','${a[0]}')" onmouseenter="showTip(event,'${a[0]}: ${a[1]} PRs — clic para filtrar')" onmouseleave="hideTip()"/>`;
+    acc+=ang;});
+  svg+=`<text x="110" y="106" text-anchor="middle" font-size="26" font-weight="800" fill="#1B3A5C">${total}</text><text x="110" y="124" text-anchor="middle" font-size="10" fill="#64748B">PRs total</text>`;
+  document.getElementById('donut').innerHTML=svg;
+  document.getElementById('donutLegend').innerHTML=agents.map(a=>`<span class="cursor-pointer hover:underline ${dash.agent===a[0]?'font-bold text-teal':''}" onclick="setDash('agent','${a[0]}')"><span class="w-2.5 h-2.5 rounded-sm shrink-0 inline-block" style="background:${a[2]}"></span> ${a[0]} <b class="ml-1">${a[1]}</b></span>`).join('');
+}
+function setDash(k,v){
+  if(k==='buyer'){ // sync donut highlight via agents mapping
+    const idx=buyers.findIndex(b=>b[0]===v);
+    dash.buyer=dash.buyer===v?null:v;
+    dash.agent=dash.buyer&&agents[idx]?agents[idx][0]:null;
+  } else if(k==='agent'){
+    const idx=agents.findIndex(a=>a[0]===v);
+    const prev=dash.agent;
+    dash.agent=prev===v?null:v;
+    dash.buyer=(dash.agent&&idx<buyers.length)?buyers[idx][0]:null;
+  } else { dash[k]=dash[k]===v?null:v; }
+  renderDash();
+}
+function renderBuyerList(){
+  document.getElementById('buyerList').innerHTML=buyers.map(([n,v1,v2],i)=>{
+    const sel=dash.buyer===n;
+    return `<button onclick="setDash('buyer','${n}')" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${sel?'bg-navy text-white shadow-md translate-x-1':'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:translate-x-1 border border-line'}">
+      <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${agents[i]?agents[i][2]:'#9DB2C6'}"></span>
+      <span class="truncate">${agents[i]?agents[i][0]:n}</span>
+      <b class="ml-auto ${sel?'text-white':'text-navy'}">${v1+v2}</b></button>`}).join('')
+    +`<button id="buyerClear" onclick="dash.buyer=dash.agent=null;renderDash()" class="w-full mt-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-teal hover:bg-teal/10 transition">✕ show all</button>`;
+}
+document.getElementById('dashClear').addEventListener('click',()=>{dash.buyer=dash.supplier=dash.agent=null;renderDash();});
+renderDash();
+
+/* scroll reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.08});
+
+/* ===== MODAL DE COMPONENTES ===== */
+const MODALS={
+ pa:{t:"Power Automate",s:"9 flows created",c:[
+  ["BOT_QR","Automated","Reads supplier responses (subject = Solicitação de orçamento + PR number), takes the attachment, renames it with the PR number and updates the tracker with status QR_BOT."],
+  ["Requester","Automated","Manages pending items with the requester when the PR is Pending with Requester."],
+  ["2 Follow_Email","Automated","1st reminder to the supplier: analyzes aging ≥ 2 days, checks the E-mail Supplier column and GEP Action = Pending with Supplier."],
+  ["3 Follow_Email","Automated","2nd reminder to the supplier; notifies the buyer that there is no response."],
+  ["2 Follow_Second Round","Automated","Follow-up with the new supplier suggested by the AI agent (1st round)."],
+  ["3 Follow_Second Round","Automated","Follow-up with the new supplier (2nd round)."],
+  ["Waiting_for another supplier","Automated","Puts the PR on hold while the new supplier responds."],
+  ["Reject_Bot","Automated","Marks unanswered PRs as To be rejected after all follow-ups."],
+  ["Clean_File","Automated","Cleans the BOT folder every 2 weeks so it does not fill up with attachments."]]},
+ outlook:{t:"Outlook Rules",s:"Rule + dedicated folder",c:[
+  ["Inbox rule","Outlook","Detects supplier response emails by the standardized subject and moves them to the BOT folder."],
+  ["BOT folder","Outlook","Centralizes all responses with attachments: it is the source BOT_QR reads from, with no noise from the general inbox."]]},
+ sp:{t:"SharePoint Tracker",s:"PR Validation Tracker",c:[
+  ["Central list","SharePoint","Single record of PRs with buyer, supplier, values, dates, follow-ups and status."],
+  ["Managed statuses","SharePoint","Pending with Supplier · QR_BOT · Pending with Requester · Savings process · To be rejected."],
+  ["Tracking columns","SharePoint","First / Second / Third Follow-up, Follow up status, E-mail Supplier and calculated Aging."]]},
+ macro:{t:"VBA / Excel Macros",s:"Standardized quotation request",c:[
+  ["Custom macro","VBA · Excel","Consolidates the request by PR number (previously sent supplier by supplier) and builds the subject Solicitação de orçamento + PR number."],
+  ["Language by country","VBA · Excel","Sends the template in Portuguese for Brazil and in Spanish for Mexico."],
+  ["Standardized signature","VBA · Excel","Closes with the team signature for a uniform, professional tone."]]},
+ bots:{t:"RPA Bots",s:"Los 9 BOTs creados",c:[
+  ["BOT_QR","Automated","Reads supplier responses, takes the attachment, renames it with the PR number and updates the tracker with status QR_BOT."],
+  ["Requester","Automated","Manages pending items with the requester (Pending with Requester)."],
+  ["2 Follow_Email","Automated","1st reminder to the supplier if there is no response (aging ≥ 2 days)."],
+  ["3 Follow_Email","Automated","2nd reminder to the supplier; alerts the buyer that there is no response."],
+  ["2 Follow_Second Round","Automated","Follow-up with the new supplier suggested by the AI agent (1st round)."],
+  ["3 Follow_Second Round","Automated","Follow-up with the new supplier (2nd round)."],
+  ["Waiting_for another supplier","Automated","Puts the PR on hold while the new supplier responds."],
+  ["Reject_Bot","Automated","Marks unanswered PRs as To be rejected after all follow-ups."],
+  ["Clean_File","Automated","Cleans the BOT folder every 2 weeks."]]},
+ ia:{t:"AI Agent",s:"Suppliers Category card",c:[
+  ["Supplier suggestion","Conversational agent","If there is no response after the 3 follow-ups, the agent reviews previous purchases and historical data by category and suggests the next best supplier."],
+  ["Flow integration","Power Automate","The Waiting_for another supplier flow takes the suggestion, assigns the new vendor and triggers the 2 second-round follow-ups."],
+  ["Outcome","Process","No PR is left without a quotation option: if a supplier does not respond, the flow automatically finds another one."]]},
+ dash:{t:"Dashboard",s:"Follow up Dashboard",c:[
+  ["KPIs","Total Records · Average of Aging · Priority Follow Up."],
+  ["Aging by PR","Buyers detect the PRs with the most days open and work by priority."],
+  ["Distributions","Pending with supplier by buyer, QR BOT by supplier and volume by agent."]]}};
+const ov=document.createElement('div');
+ov.id='modal-ov';ov.className='fixed inset-0 z-50 hidden items-center justify-center p-4';
+ov.style.background='rgba(15,30,50,.6)';ov.style.backdropFilter='blur(3px)';
+document.body.appendChild(ov);
+function openModal(k){
+ const m=MODALS[k];if(!m)return;
+ ov.innerHTML=`<div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+  <div class="sticky top-0 bg-navy text-white px-5 py-4 flex items-start justify-between gap-4">
+    <div><h3 class="font-bold text-lg">${m.t}</h3><p class="text-teal-300 text-xs mt-0.5">${m.s}</p></div>
+    <button id="m-close" class="text-white/70 hover:text-white text-xl leading-none px-1">✕</button>
+  </div>
+  <div class="p-5 space-y-3">${m.c.map(([a,b])=>`
+    <div class="border border-line rounded-xl p-3 bg-slate-50">
+      <p class="font-semibold text-sm text-navy">${a}</p>
+      <p class="text-xs text-slate-600 mt-1">${b}</p>
+    </div>`).join('')}</div>
+ </div>`;
+ ov.classList.remove('hidden');ov.classList.add('flex');
+ ov.querySelector('#m-close').onclick=closeModal;
+}
+function closeModal(){ov.classList.add('hidden');ov.classList.remove('flex');}
+function openDetail(t,d){ov.innerHTML=`<div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full"><div class="bg-navy text-white px-5 py-4 flex items-start justify-between gap-4"><h3 class="font-bold text-lg">${t}</h3><button id="m-close" class="text-white/70 hover:text-white text-xl leading-none px-1">✕</button></div><div class="p-5 text-sm text-slate-600">${d}</div></div>`;ov.classList.remove('hidden');ov.classList.add('flex');ov.querySelector('#m-close').onclick=closeModal;}
+document.querySelectorAll('.fx').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.t,b.dataset.d)));
+ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.querySelectorAll('#chips .chip').forEach(b=>b.addEventListener('click',()=>openModal(b.dataset.modal)));
+document.querySelectorAll('.fade-up').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
